@@ -1,38 +1,32 @@
-// Вспомогательная функция для проигрывания звуков только администраторам
 /proc/play_sound_to_admins(soundfile)
 	for(var/client/C in GLOB.clients)
 		if(C && C.holder)
 			SEND_SOUND(C, sound(soundfile))
 
 
-// Основной proc — назначить / снять мастера раунда
 /client/proc/make_round_master()
 	set name = "Make Round Master"
 	set category = "Admin"
 	set desc = "Назначить или снять звание мастера раунда."
 
-	// Проверка на попытку через advanced call
 	if(IsAdminAdvancedProcCall())
 		to_chat(src, "<span class='boldannounceooc'>Действие заблокировано: Advanced ProcCall.</span>")
 		message_admins("[key_name(src)] попытался вызвать make_round_master через advanced proc-call.")
 		log_admin("[key_name(src)] попытался вызвать make_round_master через advanced proc-call.")
 		return
 
-	// Только для админов
 	if(!holder)
 		to_chat(src, "<span class='boldannounceooc'>Только администраторы могут делать это.</span>")
 		message_admins("[key_name(src)] попытался стать мастером раунда без прав.")
 		log_admin("[key_name(src)] попытался стать мастером раунда без прав.")
 		return
 
-	// Проверяем, есть ли уже мастер
 	var/client/current_master = null
 	for(var/client/C in GLOB.clients)
 		if(C.master_of_round)
 			current_master = C
 			break
 
-	// Если ты уже мастер — снимаем статус
 	if(src.master_of_round)
 		src.master_of_round = FALSE
 		world << "<b>[key_name(src)]</b> больше не мастер раунда."
@@ -41,7 +35,6 @@
 		message_admins("[key_name_admin(src)] больше не мастер раунда.")
 		return
 
-	// Если другой админ уже мастер — спрашиваем подтверждение
 	if(current_master && current_master != src)
 		if(alert(src, "[key_name(current_master)] уже является мастером раунда. Перенять звание?", "Подтверждение", "Да", "Нет") == "Нет")
 			return
@@ -52,7 +45,6 @@
 		message_admins("[key_name_admin(src)] перенял роль мастера раунда у [key_name_admin(current_master)].")
 		log_admin("[key_name(src)] перенял роль мастера раунда у [key_name(current_master)].")
 
-	// Назначаем себя мастером
 	src.master_of_round = TRUE
 	world << "<b>[key_name(src)]</b> теперь мастер этого раунда!"
 	play_sound_to_admins('sound/effects/adminhelp.ogg')
