@@ -6,5 +6,4 @@
 /datum/modpack/administration/initialize()
 	GLOB.admin_verbs_admin += list(
 		/client/proc/cmd_admin_offer_control,
-		/client/proc/make_round_master,
 	)
